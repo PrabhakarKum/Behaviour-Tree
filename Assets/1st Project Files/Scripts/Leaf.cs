@@ -2,15 +2,15 @@
 public class Leaf : Node
 {
     public delegate NodeStatus Tick();
-    public readonly Tick ProcessMethod;
+    private readonly Tick _processMethod;
 
     public Leaf(string nodeName, Tick processMethod) : base(nodeName)
     {
         NodeName = nodeName;
-        ProcessMethod = processMethod;
+        _processMethod = processMethod;
     }
     public override NodeStatus Process()
     {
-        return ProcessMethod?.Invoke() ?? NodeStatus.Failure;
+        return _processMethod?.Invoke() ?? NodeStatus.Failure;
     }
 }

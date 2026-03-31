@@ -4,13 +4,12 @@ public class Node
 {
     public enum NodeStatus { Success, Running, Failure };
     
-    public NodeStatus nodeStatus;
-    public List<Node> Children = new List<Node>();
-    
-    public int CurrentChild = 0;
+    public readonly List<Node> Children = new List<Node>();
+
+    protected int CurrentChild = 0;
     public string NodeName;
-    
-    public Node(string nodeName = "Node")
+
+    protected Node(string nodeName = "Node")
     {
         NodeName = nodeName;
     }
