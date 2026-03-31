@@ -6,13 +6,18 @@ public class BehaviourTree : Node
 {
     public BehaviourTree(string nodeName) : base(nodeName)
     {
-        this.nodeName = "Tree";
+        NodeName = "Tree";
+    }
+
+    public override NodeStatus Process()
+    {
+        return Children[CurrentChild].Process();
     }
 
     struct NodeLevel
     {
-        public int level;
-        public Node node;
+        public int Level;
+        public Node Node;
         
     }
     public void PrintTree()
@@ -20,16 +25,16 @@ public class BehaviourTree : Node
         string treePrintOut = "";
         Stack<NodeLevel> nodeStack = new Stack<NodeLevel>();
         Node currentNode = this;
-        nodeStack.Push(new NodeLevel() { level = 0, node = currentNode });
+        nodeStack.Push(new NodeLevel() { Level = 0, Node = currentNode });
 
         while (nodeStack.Count != 0)
         {
             NodeLevel nextNode = nodeStack.Pop();
-            treePrintOut += new string ('-' , nextNode.level ) + nextNode.node.nodeName + "\n";
+            treePrintOut += new string ('-' , nextNode.Level ) + nextNode.Node.NodeName + "\n";
             
-            for (int i = nextNode.node.children.Count - 1; i >= 0; i--)
+            for (int i = nextNode.Node.Children.Count - 1; i >= 0; i--)
             {
-                nodeStack.Push(new NodeLevel { level = nextNode.level + 1, node = nextNode.node.children[i]});
+                nodeStack.Push(new NodeLevel { Level = nextNode.Level + 1, Node = nextNode.Node.Children[i]});
             }
         }
         

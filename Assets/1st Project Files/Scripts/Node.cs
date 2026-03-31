@@ -2,19 +2,26 @@ using System.Collections.Generic;
 using UnityEngine;
 public class Node
 {
-    public enum Status { SUCCESS, RUNNING, FAILURE };
-    public Status status;
-    public List<Node> children = new List<Node>();
-    public int currentChild = 0;
-    public string nodeName;
+    public enum NodeStatus { Success, Running, Failure };
     
-    public Node(string nodeName)
+    public NodeStatus nodeStatus;
+    public List<Node> Children = new List<Node>();
+    
+    public int CurrentChild = 0;
+    public string NodeName;
+    
+    public Node(string nodeName = "Node")
     {
-        this.nodeName = nodeName;
+        NodeName = nodeName;
     }
 
+    public virtual NodeStatus Process()
+    {
+       return Children[CurrentChild].Process();
+    }
+    
     public void AddChild(Node child)
     {
-        children.Add(child);
+        Children.Add(child);
     }
 }

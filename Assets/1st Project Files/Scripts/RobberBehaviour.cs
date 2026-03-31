@@ -15,15 +15,27 @@ public class RobberBehaviour : MonoBehaviour
         
         tree = new BehaviourTree(name);
         var steal = new Node("Steal Something");
-        var goToDiamond = new Node("Go To Diamond");
-        var goToVan  = new Node("Go To Van");
+        var goToDiamond = new Leaf("Go To Diamond", GoToDiamond);
+        var goToVan  = new Leaf("Go To Van", GoToVan);
         
         steal.AddChild(goToDiamond);
         steal.AddChild(goToVan);
         tree.AddChild(steal);
         
         tree.PrintTree();
-        
+        tree.Process();
+
+    }
+
+    private Node.NodeStatus GoToDiamond()
+    {
         agent.SetDestination(diamond.transform.position);
+        return Node.NodeStatus.Success;
+    }
+    
+    private Node.NodeStatus GoToVan()
+    {
+        agent.SetDestination(van.transform.position);
+        return Node.NodeStatus.Success;
     }
 }
