@@ -1,16 +1,20 @@
 ﻿using System;
 using UnityEngine;
 using UnityEngine.AI;
+using VHierarchy.Libs;
 
 public class RobberBehaviour : MonoBehaviour
 { 
-    private BehaviourTree tree;
+    private BehaviourTree _tree;
     public GameObject frontDoor;
     public GameObject backDoor;
     public GameObject diamond;
     public GameObject van;
     
-    private NavMeshAgent agent;
+    [Range(0,1000)]
+    public int money = 800;
+    
+    private NavMeshAgent _agent;
 
     private enum ActionState { Idle, Working };
     private ActionState _actionState = ActionState.Idle;
@@ -18,18 +22,23 @@ public class RobberBehaviour : MonoBehaviour
     private Node.NodeStatus _treeStatus = Node.NodeStatus.Running;
     private void Start()
     {
-        agent = GetComponent<NavMeshAgent>();
+        _agent = GetComponent<NavMeshAgent>();
         
-        tree = new BehaviourTree(name);
+        _tree = new BehaviourTree(name);
         
         var steal = new Sequence("Steal Something");
         
-        var goToFrontDoor = new Leaf("Go To Front Door", GoToFrontDoor);
-        var goToDiamond = new Leaf("Go To Diamond", GoToDiamond);
-        var goToBackDoor =  new Leaf("Go To Back Door", GoToBackDoor);
-        var goToVan  = new Leaf("Go To Van", GoToVan);
+        var hasGotMoney = new Leaf("Has Got Money", HasMoney);
         
         var openDoor = new Selector("Open Door");
+        var goToFrontDoor = new Leaf("Go To Front Door", GoToFrontDoor);
+        var goToBackDoor =  new Leaf("Go To Back Door", GoToBackDoor);
+        
+        var goToDiamond = new Leaf("Go To Diamond", GoToDiamond);
+        
+        var goToVan  = new Leaf("Go To Van", GoToVan);
+        
+        steal.AddChild(hasGotMoney);
         
         openDoor.AddChild(goToFrontDoor);
         openDoor.AddChild(goToBackDoor);
@@ -38,8 +47,13 @@ public class RobberBehaviour : MonoBehaviour
         steal.AddChild(goToDiamond);
         steal.AddChild(goToVan);
         
-        tree.AddChild(steal);
-        tree.PrintTree();
+        _tree.AddChild(steal);
+        _tree.PrintTree();
+    }
+    
+    private Node.NodeStatus HasMoney()
+    {
+        return money > 500 ? Node.NodeStatus.Failure : Node.NodeStatus.Success;
     }
     
     private Node.NodeStatus GoToFrontDoor()
@@ -66,7 +80,15 @@ public class RobberBehaviour : MonoBehaviour
     
     private Node.NodeStatus GoToVan()
     {
-       return GoToLocation(van.transform.position);
+       var status =  GoToLocation(van.transform.position);
+       
+       if (status == Node.NodeStatus.Success)
+       {
+           diamond.Destroy(); 
+           money += 300;
+       }
+
+       return status;
     }
 
     public Node.NodeStatus GoToDoor(GameObject door)
@@ -92,10 +114,10 @@ public class RobberBehaviour : MonoBehaviour
        
        if (_actionState == ActionState.Idle)
        {
-           agent.SetDestination(destination);
+           _agent.SetDestination(destination);
            _actionState = ActionState.Working;
        }
-       else if (Vector3.Distance(agent.pathEndPosition, destination) >= 2)
+       else if (Vector3.Distance(_agent.pathEndPosition, destination) >= 2)
        {
            _actionState = ActionState.Idle;
            return Node.NodeStatus.Failure;
@@ -111,7 +133,7 @@ public class RobberBehaviour : MonoBehaviour
 
     private void Update()
     {
-        if(_treeStatus == Node.NodeStatus.Running)
-            _treeStatus = tree.Process();
+        if(_treeStatus != Node.NodeStatus.Success)
+            _treeStatus = _tree.Process();
     }
 }
