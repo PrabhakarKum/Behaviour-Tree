@@ -4,12 +4,13 @@ using UnityEngine.AI;
 
 public class RobberBehaviour : MonoBehaviour
 { 
-    BehaviourTree tree;
-    public GameObject door;
+    private BehaviourTree tree;
+    public GameObject frontDoor;
+    public GameObject backDoor;
     public GameObject diamond;
     public GameObject van;
     
-    NavMeshAgent agent;
+    private NavMeshAgent agent;
 
     private enum ActionState { Idle, Working };
     private ActionState _actionState = ActionState.Idle;
@@ -20,32 +21,69 @@ public class RobberBehaviour : MonoBehaviour
         agent = GetComponent<NavMeshAgent>();
         
         tree = new BehaviourTree(name);
+        
         var steal = new Sequence("Steal Something");
-        var goToDoor = new Leaf("Go To Door", GoToDoor);
+        
+        var goToFrontDoor = new Leaf("Go To Front Door", GoToFrontDoor);
         var goToDiamond = new Leaf("Go To Diamond", GoToDiamond);
+        var goToBackDoor =  new Leaf("Go To Back Door", GoToBackDoor);
         var goToVan  = new Leaf("Go To Van", GoToVan);
         
-        steal.AddChild(goToDoor);
+        var openDoor = new Selector("Open Door");
+        
+        openDoor.AddChild(goToFrontDoor);
+        openDoor.AddChild(goToBackDoor);
+        
+        steal.AddChild(openDoor);
         steal.AddChild(goToDiamond);
         steal.AddChild(goToVan);
-        tree.AddChild(steal);
         
+        tree.AddChild(steal);
         tree.PrintTree();
     }
     
-    private Node.NodeStatus GoToDoor()
+    private Node.NodeStatus GoToFrontDoor()
     {
-        return GoToLocation(door.transform.position);
+        return GoToDoor(frontDoor);
+    }
+    
+    private Node.NodeStatus GoToBackDoor()
+    {
+        return GoToDoor(backDoor);
     }
 
     private Node.NodeStatus GoToDiamond()
     {
-       return GoToLocation(diamond.transform.position);
+       var status =  GoToLocation(diamond.transform.position);
+       
+       if (status == Node.NodeStatus.Success)
+       {
+           diamond.transform.SetParent(gameObject.transform);
+       }
+
+       return status;
     }
     
     private Node.NodeStatus GoToVan()
     {
        return GoToLocation(van.transform.position);
+    }
+
+    public Node.NodeStatus GoToDoor(GameObject door)
+    {
+        var status = GoToLocation(door.transform.position);
+        
+        if (status == Node.NodeStatus.Success)
+        {
+            if (!door.GetComponent<Lock>().IsLocked)
+            {
+                door.SetActive(false);
+                return Node.NodeStatus.Success;
+            }
+            return Node.NodeStatus.Failure;
+        }
+
+        return status;
     }
     
     private Node.NodeStatus GoToLocation(Vector3 destination)
