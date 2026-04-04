@@ -1,12 +1,12 @@
-﻿using System;
+﻿
+using System.Collections;
 using UnityEngine;
 using UnityEngine.AI;
-using VHierarchy.Libs;
 
 public class BTAgent : MonoBehaviour
 { 
     protected BehaviourTree _tree;
-    protected NavMeshAgent _agent;
+    private NavMeshAgent _agent;
 
     protected enum ActionState
     {
@@ -15,12 +15,20 @@ public class BTAgent : MonoBehaviour
     };
 
     protected ActionState _actionState = ActionState.Idle;
-    protected Node.NodeStatus _treeStatus = Node.NodeStatus.Running;
+    private Node.NodeStatus _treeStatus = Node.NodeStatus.Running;
+    private WaitForSeconds _waitForSeconds;
 
     protected virtual void Start()
     {
         _agent = GetComponent<NavMeshAgent>();
         _tree = new BehaviourTree(name);
+        _waitForSeconds = new WaitForSeconds(Random.Range(0.1f, 1f));
+        
+    }
+
+    protected void StartBehaviour()
+    {
+        StartCoroutine(Behaviour());
     }
 
     protected Node.NodeStatus GoToLocation(Vector3 destination)
@@ -46,8 +54,12 @@ public class BTAgent : MonoBehaviour
         return Node.NodeStatus.Running;
     }
 
-    protected virtual void Update()
+    private IEnumerator Behaviour()
     {
-        if (_treeStatus != Node.NodeStatus.Success) _treeStatus = _tree.Process();
+        while (true)
+        {
+            _treeStatus = _tree.Process();
+            yield return _waitForSeconds;
+        }
     }
 }

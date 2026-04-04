@@ -43,6 +43,7 @@ public class RobberBehaviour : BTAgent
 
         _tree.AddChild(steal);
         _tree.PrintTree();
+        StartBehaviour();
     }
 
     private Node.NodeStatus HasMoney()
@@ -101,10 +102,5 @@ public class RobberBehaviour : BTAgent
         }
 
         return status;
-    }
-
-    protected override void Update()
-    {
-        base.Update();
     }
 }
