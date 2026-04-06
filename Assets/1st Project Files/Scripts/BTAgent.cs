@@ -1,5 +1,4 @@
-﻿
-using System.Collections;
+﻿using System.Collections;
 using UnityEngine;
 using UnityEngine.AI;
 
@@ -8,14 +7,14 @@ public class BTAgent : MonoBehaviour
     protected BehaviourTree _tree;
     private NavMeshAgent _agent;
 
-    protected enum ActionState
+    public enum ActionState
     {
         Idle,
         Working
     };
 
-    protected ActionState _actionState = ActionState.Idle;
-    private Node.NodeStatus _treeStatus = Node.NodeStatus.Running;
+    public ActionState _actionState = ActionState.Idle;
+    public Node.NodeStatus _treeStatus = Node.NodeStatus.Running;
     private WaitForSeconds _waitForSeconds;
 
     protected virtual void Start()
@@ -58,7 +57,9 @@ public class BTAgent : MonoBehaviour
     {
         while (true)
         {
-            _treeStatus = _tree.Process();
+            if(_treeStatus != Node.NodeStatus.Success)
+                _treeStatus = _tree.Process();
+            
             yield return _waitForSeconds;
         }
     }

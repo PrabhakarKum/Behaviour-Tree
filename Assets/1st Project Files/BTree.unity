@@ -2205,9 +2205,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9a269e6db24240148f9dc3290db37fa5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _actionState: 0
+  _treeStatus: 1
   frontDoor: {fileID: 1791870521}
   backDoor: {fileID: 919599686}
   diamond: {fileID: 1550492363}
+  painting: {fileID: 1959054990}
   van: {fileID: 322815850}
   money: 800
 --- !u!1 &716268924
